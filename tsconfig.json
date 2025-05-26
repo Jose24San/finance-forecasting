@@ -8,6 +8,36 @@
     },
     {
       "path": "./apps/finpilot"
+    },
+    {
+      "path": "./apps/web-e2e"
+    },
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./apps/api-e2e"
+    },
+    {
+      "path": "./apps/api"
+    },
+    {
+      "path": "./libs"
+    },
+    {
+      "path": "./libs"
+    },
+    {
+      "path": "./libs"
+    },
+    {
+      "path": "./libs/ui"
+    },
+    {
+      "path": "./libs/auth"
+    },
+    {
+      "path": "./libs/api-clients"
     }
   ]
 }

@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  hashedPassword String
+  fullName  String?
+  tier      Tier       @default(FREE)
+  scenarios Scenario[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+enum Tier {
+  FREE
+  STANDARD
+  PREMIUM
+}
+
+model Scenario {
+  id           String           @id @default(uuid())
+  user         User             @relation(fields: [userId], references: [id])
+  userId       String
+  title        String
+  description  String?
+  milestones   Milestone[]
+  assets       Asset[]
+  incomeStreams IncomeStream[]
+  withdrawalOrders WithdrawalOrder[]
+  householdMembers HouseholdMember[]
+  settings     Settings?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model Milestone {
+  id              String   @id @default(uuid())
+  scenario        Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId      String
+  type            MilestoneType
+  label           String
+  startDate       DateTime
+  durationMonths  Int?
+  estimatedCost   Float
+  inflationRate   Float
+  fundingSource   String?  // FK to Asset.id if used
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum MilestoneType {
+  retirement
+  college
+  purchase
+  income_change
+  death_of_spouse
+  custom
+}
+
+model Asset {
+  id              String   @id @default(uuid())
+  scenario        Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId      String
+  label           String
+  type            AssetType
+  value           Float
+  annualGrowthRate Float
+  isPrimaryHome   Boolean @default(false)
+  owner           HouseholdMember? @relation(fields: [ownerId], references: [id])
+  ownerId         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum AssetType {
+  taxable
+  tax_deferred
+  tax_free
+  real_estate
+  crypto
+}
+
+model IncomeStream {
+  id                  String   @id @default(uuid())
+  scenario            Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId          String
+  sourceName          String
+  amount              Float
+  frequency           Frequency
+  startDate           DateTime
+  endDate             DateTime?
+  raiseRate           Float?
+  contributionPercentage Float?
+  recipient           HouseholdMember? @relation(fields: [recipientId], references: [id])
+  recipientId         String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+enum Frequency {
+  monthly
+  yearly
+}
+
+model WithdrawalOrder {
+  id          String   @id @default(uuid())
+  scenario    Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId  String
+  asset       Asset    @relation(fields: [assetId], references: [id])
+  assetId     String
+  orderIndex  Int
+  priorityGroup Int?
+  customRule  Json?
+}
+
+model Settings {
+  id                        String   @id @default(uuid())
+  scenario                 Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId               String
+  lifeExpectancy           Int
+  defaultStockGrowthRate   Float
+  defaultRealEstateGrowthRate Float
+  defaultInflationRate     Float
+  projectedTaxModelYear    Int
+  country                  String
+  withdrawalStrategy       WithdrawalStrategy
+}
+
+enum WithdrawalStrategy {
+  tax_efficient
+  proportional
+  custom
+}
+
+model TaxBracket {
+  id            String   @id @default(uuid())
+  year          Int
+  country       String
+  filingStatus  FilingStatus
+  bracketFloor  Float
+  bracketCeiling Float?
+  rate          Float
+  isCapitalGains Boolean
+  isLongTerm    Boolean
+}
+
+enum FilingStatus {
+  single
+  married_joint
+  married_separate
+  head_of_household
+}
+
+model HouseholdMember {
+  id              String   @id @default(uuid())
+  scenario        Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId      String
+  name            String
+  relationship    Relationship
+  birthDate       DateTime
+  isPrimaryUser   Boolean
+  assets          Asset[]
+  incomeStreams   IncomeStream[]
+}
+
+enum Relationship {
+  self
+  spouse
+  child
+  other
+}
