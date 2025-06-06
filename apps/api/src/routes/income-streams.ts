@@ -32,6 +32,7 @@ const incomeStreams = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to create income stream' });
+      return;
     }
   });
 
@@ -49,6 +50,7 @@ const incomeStreams = async (server: ReturnType<typeof fastify>) => {
       } catch (error) {
         server.log.error(error);
         reply.status(500).send({ error: 'Failed to fetch income streams' });
+        return;
       }
     }
   );
@@ -75,6 +77,7 @@ const incomeStreams = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to update income stream' });
+      return;
     }
   });
 

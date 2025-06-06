@@ -18,9 +18,16 @@ export function PersonalProfileForm() {
 
   const profileErrors = validationErrors.personalProfile || {};
 
-  const formatLastSaved = (date: Date | null) => {
+  const formatLastSaved = (date: Date | string | null) => {
     if (!date) return 'Never saved';
-    return `Saved ${date.toLocaleTimeString()}`;
+
+    // Handle both Date objects and date strings (from localStorage persistence)
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) return 'Never saved';
+
+    return `Saved ${dateObj.toLocaleTimeString()}`;
   };
 
   return (

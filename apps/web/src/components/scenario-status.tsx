@@ -9,6 +9,7 @@ export function ScenarioStatus() {
     isFormValid,
     isDirty,
     lastSaved,
+    scenarioName,
     personalProfile,
     assets,
     incomeStreams,
@@ -18,19 +19,27 @@ export function ScenarioStatus() {
   // Enable auto-save for the entire scenario
   useAutoSave();
 
-  const formatLastSaved = (date: Date | null) => {
+  const formatLastSaved = (date: Date | string | null) => {
     if (!date) return 'Never';
+
+    // Handle both Date objects and date strings (from localStorage persistence)
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) return 'Never';
+
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    const diffMs = now.getTime() - dateObj.getTime();
     const diffMinutes = Math.floor(diffMs / 60000);
 
     if (diffMinutes < 1) return 'Just now';
     if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    return date.toLocaleTimeString();
+    return dateObj.toLocaleTimeString();
   };
 
   const getValidationErrorCount = () => {
     let count = 0;
+    if (validationErrors.scenarioName) count += 1;
     if (validationErrors.personalProfile)
       count += Object.keys(validationErrors.personalProfile).length;
     if (validationErrors.assets)
@@ -46,6 +55,7 @@ export function ScenarioStatus() {
   const totalItems =
     assets.length + incomeStreams.length + milestones.length + 1; // +1 for profile
   const hasAnyData =
+    scenarioName.trim().length > 0 ||
     personalProfile.age ||
     personalProfile.location ||
     assets.length ||
@@ -111,6 +121,18 @@ export function ScenarioStatus() {
         <div className="pt-2 border-t space-y-2">
           <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
             <div className="flex justify-between">
+              <span>Name:</span>
+              <span
+                className={
+                  scenarioName.trim().length > 0
+                    ? 'text-green-600'
+                    : 'text-orange-600'
+                }
+              >
+                {scenarioName.trim().length > 0 ? 'Set' : 'Missing'}
+              </span>
+            </div>
+            <div className="flex justify-between">
               <span>Profile:</span>
               <span
                 className={
@@ -151,6 +173,9 @@ export function ScenarioStatus() {
           <div className="pt-2 border-t">
             <div className="text-xs text-red-600 space-y-1">
               <div className="font-medium">Issues to fix:</div>
+              {validationErrors.scenarioName && (
+                <div>• Scenario Name: {validationErrors.scenarioName}</div>
+              )}
               {validationErrors.personalProfile && (
                 <div>
                   • Profile:{' '}
@@ -158,6 +183,17 @@ export function ScenarioStatus() {
                   {Object.keys(validationErrors.personalProfile).length === 1
                     ? ''
                     : 's'}
+                  {/* Show detailed profile error messages */}
+                  {Object.entries(validationErrors.personalProfile).map(
+                    ([field, message]) => (
+                      <div
+                        key={field}
+                        className="ml-4 mt-1 text-xs text-red-500"
+                      >
+                        ▸ {message}
+                      </div>
+                    )
+                  )}
                 </div>
               )}
               {validationErrors.assets &&
@@ -188,6 +224,20 @@ export function ScenarioStatus() {
                     {Object.keys(validationErrors.milestones).length === 1
                       ? ''
                       : 's'}
+                    {/* Show detailed milestone error messages */}
+                    {Object.entries(validationErrors.milestones).map(
+                      ([milestoneId, milestoneErrors]) => (
+                        <div key={milestoneId} className="ml-4 mt-1 text-xs">
+                          {Object.entries(milestoneErrors).map(
+                            ([field, message]) => (
+                              <div key={field} className="text-red-500">
+                                ▸ {message}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )
+                    )}
                   </div>
                 )}
             </div>

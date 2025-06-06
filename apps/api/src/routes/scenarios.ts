@@ -21,6 +21,7 @@ const scenarios = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to create scenario' });
+      return;
     }
   });
 
@@ -49,6 +50,7 @@ const scenarios = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to fetch scenario' });
+      return;
     }
   });
 
@@ -66,6 +68,7 @@ const scenarios = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to update scenario' });
+      return;
     }
   });
 

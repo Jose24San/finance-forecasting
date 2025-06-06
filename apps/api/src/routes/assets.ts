@@ -23,6 +23,7 @@ const assets = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to create asset' });
+      return;
     }
   });
 
@@ -40,6 +41,7 @@ const assets = async (server: ReturnType<typeof fastify>) => {
       } catch (error) {
         server.log.error(error);
         reply.status(500).send({ error: 'Failed to fetch assets' });
+        return;
       }
     }
   );
@@ -58,6 +60,7 @@ const assets = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to update asset' });
+      return;
     }
   });
 

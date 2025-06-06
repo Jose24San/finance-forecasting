@@ -3,7 +3,10 @@ import { PersonalProfileForm } from '@/components/personal-profile-form';
 import { AssetManagementForm } from '@/components/asset-management-form';
 import { IncomeStreamForm } from '@/components/income-stream-form';
 import { MilestoneForm } from '@/components/milestone-form';
+import { ScenarioNameForm } from '@/components/scenario-name-form';
 import { ScenarioStatus } from '@/components/scenario-status';
+import { SaveScenarioButton } from '@/components/save-scenario-button';
+import { ForecastVisualization } from '@/components/forecast-visualization';
 
 export const metadata: Metadata = {
   title: 'Dashboard | Finpilot',
@@ -62,11 +65,17 @@ export default function DashboardPage() {
         {/* Scenario Editor Section - Will be populated in next steps */}
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">Scenario Editor</h2>
-            <div className="text-sm text-muted-foreground">
-              Changes are automatically saved to your browser
+            <div>
+              <h2 className="text-2xl font-semibold">Scenario Editor</h2>
+              <div className="text-sm text-muted-foreground">
+                Changes are automatically saved to your browser
+              </div>
             </div>
+            <SaveScenarioButton />
           </div>
+
+          {/* Add the scenario name form */}
+          <ScenarioNameForm />
 
           {/* Add the status component */}
           <ScenarioStatus />
@@ -93,6 +102,20 @@ export default function DashboardPage() {
               <MilestoneForm />
             </div>
           </div>
+
+          {/* Forecast Visualization Section */}
+          <section className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-semibold mb-2">
+                Financial Forecast
+              </h2>
+              <p className="text-muted-foreground">
+                Visualize your financial trajectory based on your current
+                scenario data.
+              </p>
+            </div>
+            <ForecastVisualization scenarioId="draft" />
+          </section>
         </section>
       </div>
     </div>

@@ -23,6 +23,7 @@ const milestones = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to create milestone' });
+      return;
     }
   });
 
@@ -40,6 +41,7 @@ const milestones = async (server: ReturnType<typeof fastify>) => {
       } catch (error) {
         server.log.error(error);
         reply.status(500).send({ error: 'Failed to fetch milestones' });
+        return;
       }
     }
   );
@@ -64,6 +66,7 @@ const milestones = async (server: ReturnType<typeof fastify>) => {
     } catch (error) {
       server.log.error(error);
       reply.status(500).send({ error: 'Failed to update milestone' });
+      return;
     }
   });
 

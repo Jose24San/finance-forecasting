@@ -36,14 +36,21 @@ async function registerRoutes() {
     return { status: 'ok' };
   });
 
-  // Register route modules
-  server.register(import('./routes/scenarios'), { prefix: '/api/scenarios' });
-  server.register(import('./routes/assets'), { prefix: '/api/assets' });
-  server.register(import('./routes/income-streams'), {
-    prefix: '/api/income-streams',
-  });
-  server.register(import('./routes/milestones'), { prefix: '/api/milestones' });
-  server.register(import('./routes/forecast'), { prefix: '/api/forecast' });
+  // Register route modules with proper dynamic import handling
+  const [scenarios, assets, incomeStreams, milestones, forecast] =
+    await Promise.all([
+      import('./routes/scenarios.js'),
+      import('./routes/assets.js'),
+      import('./routes/income-streams.js'),
+      import('./routes/milestones.js'),
+      import('./routes/forecast.js'),
+    ]);
+
+  server.register(scenarios.default, { prefix: '/api/scenarios' });
+  server.register(assets.default, { prefix: '/api/assets' });
+  server.register(incomeStreams.default, { prefix: '/api/income-streams' });
+  server.register(milestones.default, { prefix: '/api/milestones' });
+  server.register(forecast.default, { prefix: '/api/forecast' });
 }
 
 // Start server

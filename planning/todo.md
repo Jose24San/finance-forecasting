@@ -67,34 +67,34 @@ A comprehensive breakdown of implementation steps based on the full Finpilot spe
 
 ## 🧮 Milestone 5: Forecasting Engine (v1)
 
-- [ ] Build TypeScript function to:
+- [x] Build TypeScript function to:
 
-  - [ ] Project income over time
-  - [ ] Project asset growth (7% stocks, 3% real estate)
-  - [ ] Apply milestone impacts (costs, timing)
-  - [ ] Apply inflation (2.5%)
+  - [x] Project income over time
+  - [x] Project asset growth (7% stocks, 3% real estate)
+  - [x] Apply milestone impacts (costs, timing)
+  - [x] Apply inflation (2.5%)
 
-- [ ] Return timeline (array of years with net worth, income, and expenses)
-- [ ] Integrate into `POST /forecast`
+- [x] Return timeline (array of years with net worth, income, and expenses)
+- [x] Integrate into `POST /forecast`
 
 ---
 
 ## 📈 Milestone 6: Scenario Visualization
 
-- [ ] Use Recharts to build:
+- [x] Use Recharts to build:
 
-  - [ ] Net worth timeline chart
-  - [ ] Drill-down year-by-year table
+  - [x] Net worth timeline chart
+  - [x] Drill-down year-by-year table
 
-- [ ] Highlight risk years visually (negative or low net worth)
+- [x] Highlight risk years visually (negative or low net worth)
 - [ ] Connect forecast data from API
 
 ---
 
 ## 🔒 Milestone 7: Save + Share
 
-- [ ] Implement scenario persistence (Supabase)
-- [ ] Add "Save Scenario" button
+- [x] Implement scenario persistence (Supabase)
+- [x] Add "Save Scenario" button
 - [ ] Generate read-only share link
 - [ ] Create read-only UI version for public links
 

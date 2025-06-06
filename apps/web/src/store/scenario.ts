@@ -1,5 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import {
+  apiClient,
+  CreateScenarioRequest,
+  ScenarioResponse,
+  ApiError,
+} from '@/lib/api-client';
 
 // Types for our form state
 export interface PersonalProfile {
@@ -56,6 +62,7 @@ export interface Milestone {
 
 // Validation types
 export interface ValidationErrors {
+  scenarioName?: string;
   personalProfile?: {
     age?: string;
     location?: string;
@@ -110,6 +117,13 @@ export interface ScenarioFormState {
   lastSaved: Date | null;
   isDirty: boolean;
 
+  // Save state
+  scenarioId: string | null;
+  scenarioName: string;
+  scenarioDescription: string;
+  isSaving: boolean;
+  saveError: string | null;
+
   // Actions
   updatePersonalProfile: (profile: Partial<PersonalProfile>) => void;
   addAsset: (asset: Omit<Asset, 'id'>) => void;
@@ -125,6 +139,13 @@ export interface ScenarioFormState {
   clearValidationErrors: () => void;
   markAsClean: () => void;
   resetForm: () => void;
+
+  // Save actions
+  updateScenarioName: (name: string) => void;
+  updateScenarioInfo: (name: string, description?: string) => void;
+  saveScenario: () => Promise<boolean>;
+  loadScenario: (id: string) => Promise<boolean>;
+  canSave: () => boolean;
 }
 
 // Helper function to get default growth rate based on asset category
@@ -161,6 +182,16 @@ export const getAnnualIncome = (
 };
 
 // Validation functions
+const validateScenarioName = (name: string): string | undefined => {
+  if (name.trim().length === 0) {
+    return 'Scenario name is required';
+  }
+  if (name.trim().length > 100) {
+    return 'Scenario name must be 100 characters or less';
+  }
+  return undefined;
+};
+
 const validatePersonalProfile = (
   profile: PersonalProfile
 ): ValidationErrors['personalProfile'] => {
@@ -244,8 +275,14 @@ const validateMilestone = (
   } else {
     const targetDate = new Date(milestone.date);
     const today = new Date();
+
+    // Reset time to start of day for accurate comparison
+    today.setHours(0, 0, 0, 0);
+    targetDate.setHours(0, 0, 0, 0);
+
     if (targetDate < today) {
-      errors.date = 'Target date must be in the future';
+      errors.date =
+        'Please select today or a future date for your financial milestone. Past dates cannot be used for financial planning.';
     }
   }
 
@@ -277,7 +314,28 @@ export const useScenarioStore = create<ScenarioFormState>()(
       lastSaved: null,
       isDirty: false,
 
+      // Save state
+      scenarioId: null,
+      scenarioName: '',
+      scenarioDescription: '',
+      isSaving: false,
+      saveError: null,
+
       // Actions
+      updateScenarioName: (name) => {
+        set((state) => {
+          const error = validateScenarioName(name);
+          return {
+            scenarioName: name,
+            validationErrors: {
+              ...state.validationErrors,
+              scenarioName: error,
+            },
+            isDirty: true,
+          };
+        });
+      },
+
       updatePersonalProfile: (profile) => {
         set((state) => {
           const newProfile = { ...state.personalProfile, ...profile };
@@ -442,11 +500,23 @@ export const useScenarioStore = create<ScenarioFormState>()(
             ? validateMilestone(updatedMilestone)
             : undefined;
 
+          // Properly handle clearing errors when validation passes
+          const updatedMilestoneErrors = {
+            ...state.validationErrors.milestones,
+          };
+          if (errors) {
+            // Add/update errors
+            Object.assign(updatedMilestoneErrors, errors);
+          } else {
+            // Clear errors for this milestone
+            delete updatedMilestoneErrors[id];
+          }
+
           return {
             milestones: updatedMilestones,
             validationErrors: {
               ...state.validationErrors,
-              milestones: { ...state.validationErrors.milestones, ...errors },
+              milestones: updatedMilestoneErrors,
             },
             isDirty: true,
           };
@@ -476,6 +546,7 @@ export const useScenarioStore = create<ScenarioFormState>()(
         let hasErrors = false;
 
         // Validate all sections
+        const scenarioNameError = validateScenarioName(state.scenarioName);
         const profileErrors = validatePersonalProfile(state.personalProfile);
         const assetErrors = state.assets.reduce((acc, asset) => {
           const errors = validateAsset(asset);
@@ -491,6 +562,7 @@ export const useScenarioStore = create<ScenarioFormState>()(
         }, {});
 
         hasErrors = !!(
+          scenarioNameError ||
           profileErrors ||
           Object.keys(assetErrors).length ||
           Object.keys(streamErrors).length ||
@@ -499,6 +571,7 @@ export const useScenarioStore = create<ScenarioFormState>()(
 
         set({
           validationErrors: {
+            scenarioName: scenarioNameError,
             personalProfile: profileErrors,
             assets: assetErrors,
             incomeStreams: streamErrors,
@@ -528,7 +601,210 @@ export const useScenarioStore = create<ScenarioFormState>()(
           isFormValid: true,
           lastSaved: null,
           isDirty: false,
+          scenarioId: null,
+          scenarioName: '',
+          scenarioDescription: '',
+          isSaving: false,
+          saveError: null,
         });
+      },
+
+      // Save actions
+      updateScenarioInfo: (name, description = '') => {
+        set({
+          scenarioName: name,
+          scenarioDescription: description,
+          isDirty: true,
+        });
+      },
+
+      canSave: () => {
+        const state = get();
+
+        // Check if form is valid
+        if (!state.isFormValid) {
+          return false;
+        }
+
+        // Check minimum requirements for a valid scenario
+        const hasBasicInfo =
+          state.scenarioName.trim().length > 0 &&
+          state.personalProfile.location.trim().length > 0;
+        const hasAssets = state.assets.length > 0;
+        const hasIncomeStreams = state.incomeStreams.length > 0;
+
+        return hasBasicInfo && hasAssets && hasIncomeStreams;
+      },
+
+      saveScenario: async () => {
+        const state = get();
+
+        // Pre-flight checks
+        if (!state.canSave()) {
+          set({
+            saveError: 'Please fill in all required fields before saving.',
+          });
+          return false;
+        }
+
+        if (state.isSaving) {
+          return false; // Already saving
+        }
+
+        set({ isSaving: true, saveError: null });
+
+        try {
+          // Transform store data to API format
+          const scenarioData: CreateScenarioRequest = {
+            name: state.scenarioName,
+            description: state.scenarioDescription || undefined,
+            personalProfile: {
+              age: state.personalProfile.age,
+              location: state.personalProfile.location,
+              dependents: state.personalProfile.dependents,
+            },
+            assets: state.assets.map((asset) => ({
+              name: asset.name,
+              amount: asset.amount,
+              category: asset.category,
+              growthRate: asset.growthRate,
+            })),
+            incomeStreams: state.incomeStreams.map((stream) => ({
+              name: stream.name,
+              amount: stream.amount,
+              frequency: stream.frequency,
+              startDate: stream.startDate,
+              endDate: stream.endDate || undefined,
+              raiseRate: stream.raiseRate || undefined,
+            })),
+            milestones: state.milestones.map((milestone) => ({
+              name: milestone.name,
+              type: milestone.type,
+              date: milestone.date,
+              impact: milestone.impact,
+            })),
+            settings: {
+              inflationRate: 2.5,
+              stockGrowthRate: 7.0,
+              realEstateGrowth: 3.0,
+            },
+          };
+
+          let response: ScenarioResponse;
+
+          if (state.scenarioId) {
+            // Update existing scenario
+            response = await apiClient.updateScenario(
+              state.scenarioId,
+              scenarioData
+            );
+          } else {
+            // Create new scenario
+            response = await apiClient.createScenario(scenarioData);
+          }
+
+          // Success! Update store with saved data
+          set({
+            scenarioId: response.id,
+            isDirty: false,
+            lastSaved: new Date(),
+            isSaving: false,
+            saveError: null,
+          });
+
+          return true;
+        } catch (error) {
+          console.error('Failed to save scenario:', error);
+
+          let errorMessage = 'Failed to save scenario. Please try again.';
+          if (error instanceof ApiError) {
+            if (error.status === 401) {
+              errorMessage = 'You must be logged in to save scenarios.';
+            } else if (error.status === 400) {
+              errorMessage = 'Invalid scenario data. Please check your inputs.';
+            } else {
+              errorMessage = error.message;
+            }
+          }
+
+          set({
+            isSaving: false,
+            saveError: errorMessage,
+          });
+
+          return false;
+        }
+      },
+
+      loadScenario: async (id: string) => {
+        set({ isSaving: true, saveError: null });
+
+        try {
+          const scenario = await apiClient.getScenario(id);
+
+          // Transform API data to store format
+          set({
+            scenarioId: scenario.id,
+            scenarioName: scenario.name,
+            scenarioDescription: scenario.description || '',
+            personalProfile: {
+              age: scenario.assets.find(() => true) ? 30 : null, // TODO: Get from user profile
+              location: 'US', // TODO: Get from user profile
+              dependents: 0, // TODO: Get from user profile
+            },
+            assets: scenario.assets.map((asset) => ({
+              id: asset.id,
+              name: asset.name,
+              amount: asset.amount,
+              category: asset.category as AssetType,
+              growthRate: asset.growthRate,
+            })),
+            incomeStreams: scenario.incomeStreams.map((stream) => ({
+              id: stream.id,
+              name: stream.name,
+              amount: stream.amount,
+              frequency: stream.frequency as Frequency,
+              startDate: stream.startDate,
+              endDate: stream.endDate || undefined,
+              raiseRate: stream.raiseRate || undefined,
+            })),
+            milestones: scenario.milestones.map((milestone) => ({
+              id: milestone.id,
+              name: milestone.name,
+              type: milestone.type as MilestoneType,
+              date: milestone.date,
+              impact: milestone.impact,
+            })),
+            validationErrors: {},
+            isFormValid: true,
+            isDirty: false,
+            lastSaved: new Date(),
+            isSaving: false,
+            saveError: null,
+          });
+
+          return true;
+        } catch (error) {
+          console.error('Failed to load scenario:', error);
+
+          let errorMessage = 'Failed to load scenario. Please try again.';
+          if (error instanceof ApiError) {
+            if (error.status === 401) {
+              errorMessage = 'You must be logged in to load scenarios.';
+            } else if (error.status === 404) {
+              errorMessage = 'Scenario not found.';
+            } else {
+              errorMessage = error.message;
+            }
+          }
+
+          set({
+            isSaving: false,
+            saveError: errorMessage,
+          });
+
+          return false;
+        }
       },
     }),
     {
@@ -539,6 +815,9 @@ export const useScenarioStore = create<ScenarioFormState>()(
         incomeStreams: state.incomeStreams,
         milestones: state.milestones,
         lastSaved: state.lastSaved,
+        scenarioId: state.scenarioId,
+        scenarioName: state.scenarioName,
+        scenarioDescription: state.scenarioDescription,
       }),
     }
   )

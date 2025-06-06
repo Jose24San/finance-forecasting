@@ -29,6 +29,88 @@ interface AssetProjection {
 }
 
 const forecast: FastifyPluginAsync = async (fastify) => {
+  // Generate forecast for draft scenario data (not saved to database)
+  fastify.post('/draft', async (request, reply) => {
+    try {
+      const draftData = request.body as any;
+
+      if (!draftData) {
+        reply.status(400).send({ error: 'Draft scenario data is required' });
+        return;
+      }
+
+      // Validate minimum required fields
+      const {
+        personalProfile,
+        assets,
+        incomeStreams,
+        milestones = [],
+        settings,
+      } = draftData;
+
+      if (
+        !personalProfile?.location ||
+        !assets ||
+        assets.length === 0 ||
+        !incomeStreams ||
+        incomeStreams.length === 0
+      ) {
+        reply.status(400).send({
+          error:
+            'Missing required data: location, assets, and income streams are required',
+        });
+        return;
+      }
+
+      // Use provided settings or defaults
+      const forecastSettings: ForecastSettings = settings || {
+        inflationRate: 2.5,
+        stockGrowthRate: 7.0,
+        realEstateGrowth: 3.0,
+      };
+
+      // Create a scenario-like object for the forecast calculation
+      const scenarioData = {
+        assets: assets.map((asset: any) => ({
+          id: asset.id || `draft-${Date.now()}-${Math.random()}`,
+          name: asset.name,
+          amount: asset.amount,
+          category: asset.category,
+          growthRate: asset.growthRate,
+        })),
+        incomeStreams: incomeStreams.map((stream: any) => ({
+          id: stream.id || `draft-${Date.now()}-${Math.random()}`,
+          name: stream.name,
+          amount: stream.amount,
+          frequency: stream.frequency,
+          startDate: stream.startDate,
+          endDate: stream.endDate,
+          raiseRate: stream.raiseRate,
+        })),
+        milestones: milestones.map((milestone: any) => ({
+          id: milestone.id || `draft-${Date.now()}-${Math.random()}`,
+          name: milestone.name,
+          type: milestone.type,
+          date: milestone.date,
+          impact: milestone.impact,
+        })),
+        settings: forecastSettings,
+      };
+
+      // Calculate forecast using the same logic as saved scenarios
+      const forecast = calculateEnhancedForecast(
+        scenarioData,
+        forecastSettings
+      );
+
+      return forecast;
+    } catch (error) {
+      fastify.log.error(error);
+      reply.status(500).send({ error: 'Failed to generate draft forecast' });
+      return;
+    }
+  });
+
   // Generate forecast for a scenario
   fastify.post('/:scenarioId', async (request, reply) => {
     const { scenarioId } = request.params as { scenarioId: string };
@@ -66,6 +148,7 @@ const forecast: FastifyPluginAsync = async (fastify) => {
     } catch (error) {
       fastify.log.error(error);
       reply.status(500).send({ error: 'Failed to generate forecast' });
+      return;
     }
   });
 };
@@ -109,13 +192,7 @@ function calculateEnhancedForecast(scenario: any, settings: ForecastSettings) {
       0
     );
 
-    // 4. Calculate net worth
-    const totalAssetValue = assets.reduce(
-      (sum, asset) => sum + asset.amount,
-      0
-    );
-
-    // Apply milestone impact to assets (if positive add to first taxable, if negative reduce assets)
+    // 4. Apply milestone impact to assets (if positive add to first taxable, if negative reduce assets)
     if (milestoneImpact !== 0) {
       if (milestoneImpact > 0) {
         // Positive impact - add to first taxable account or create one
