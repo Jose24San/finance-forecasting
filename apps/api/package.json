@@ -67,5 +67,14 @@
         }
       }
     }
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "@prisma/client": "^6.8.2"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage"
   }
 }

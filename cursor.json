@@ -1,0 +1,39 @@
+{
+  "rules": [
+    {
+      "name": "Enforce Next.js conventions",
+      "match": "*.tsx",
+      "prompt": "- Use `next/link` and `next/router` for internal navigation.\n- Use `app/` and `pages/` routing as needed; prefer `app/` if in Next 13+.\n- Use Server Components and Client Components appropriately.\n- Use `shadcn/ui` and Tailwind CSS for UI components."
+    },
+    {
+      "name": "Type safety with TypeScript",
+      "match": "**/*.{ts,tsx}",
+      "prompt": "- Use strict typing, no `any` types.\n- Use `zod` for schema validation where applicable (e.g., API inputs).\n- Use Prisma types from `@prisma/client`."
+    },
+    {
+      "name": "Supabase best practices",
+      "match": "**/*.ts",
+      "prompt": "- Use Supabase JS SDK for auth and data.\n- Use hooks like `useUser` for session info.\n- Never expose service key on the client side."
+    },
+    {
+      "name": "State management with Zustand",
+      "match": "**/*.{ts,tsx}",
+      "prompt": "- Use Zustand store for global state.\n- Keep store logic in `/libs` or `/stores`.\n- Avoid prop drilling when Zustand is available."
+    },
+    {
+      "name": "API layer consistency",
+      "match": "apps/api/**/*.ts",
+      "prompt": "- Use Fastify for routes, Prisma for DB.\n- Use consistent error handling (e.g., `try/catch` with `reply.code()`).\n- Keep request/response types in a `types.ts` file."
+    },
+    {
+      "name": "Test coverage",
+      "match": "**/*.{test,spec}.{ts,tsx}",
+      "prompt": "- Use Vitest for unit tests.\n- Use Playwright/Cypress for e2e tests.\n- Mock Supabase API in tests."
+    },
+    {
+      "name": "Naming conventions",
+      "match": "**/*.{ts,tsx}",
+      "prompt": "- Use `camelCase` for variables, `PascalCase` for components.\n- Use `snake_case` in database (Prisma schema).\n- Keep filenames lowercase with dashes (e.g., `auth-context.ts`)."
+    }
+  ]
+}

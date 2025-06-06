@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Supabase integration guidelines
+globs:
+  - "**/*.ts"
+alwaysApply: false
+---
+
+- Use Supabase JS SDK for authentication and data operations.
+- Employ hooks like `useUser` for session information.
+- Never expose the service key on the client side.

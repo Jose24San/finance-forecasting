@@ -1,0 +1,16 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Enforce Next.js best practices
+globs:
+  - "apps/web/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+- Use `next/link` and `next/router` for internal navigation.
+- Prefer the `app/` directory structure if using Next.js 13+.
+- Utilize Server and Client Components appropriately.
+- Implement UI components using `shadcn/ui` and Tailwind CSS.

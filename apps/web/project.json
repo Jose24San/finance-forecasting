@@ -1,0 +1,53 @@
+{
+  "name": "@finpilot/web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/web",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "root": "apps/web",
+        "outputPath": "dist/apps/web"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/web"
+        },
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "@finpilot/web:build",
+        "dev": true,
+        "port": 4200
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "@finpilot/web:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "@finpilot/web:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nx/next:export",
+      "options": {
+        "buildTarget": "@finpilot/web:build:production"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": []
+}

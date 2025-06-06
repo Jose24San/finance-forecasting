@@ -1,5 +1,8 @@
 Excellent. Based on the full specification from `spec.md`, here is a **comprehensive development blueprint** for building Finpilot using a best-practices, test-driven, incremental approach. This plan is broken into four key parts:
 
+Primsa typescript types live here
+finpilot/node_modules/.prisma/client/index.d.ts
+
 ---
 
 ## ✅ Part 1: Strategic Blueprint (High-Level Steps)

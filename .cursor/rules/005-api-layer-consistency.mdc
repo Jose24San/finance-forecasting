@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Ensure consistency in API layer using Fastify and Prisma
+globs:
+  - "apps/api/**/*.ts"
+alwaysApply: false
+---
+
+- Use Fastify for defining routes and Prisma for database interactions.
+- Implement consistent error handling (e.g., `try/catch` with `reply.code()`).
+- Maintain request/response types in a `types.ts` file.

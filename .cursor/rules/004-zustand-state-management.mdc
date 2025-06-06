@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Guidelines for using Zustand for state management
+globs:
+  - "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+- Utilize Zustand store for global state management.
+- Place store logic within `/libs` or `/stores` directories.
+- Avoid prop drilling when Zustand is available.

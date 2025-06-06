@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Enforce consistent naming conventions across the project
+globs:
+  - "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+- Use `camelCase` for variables and `PascalCase` for components.
+- Apply `snake_case` naming in the database schema (Prisma).
+- Keep filenames lowercase with dashes (e.g., `auth-context.ts`).

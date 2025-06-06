@@ -6,61 +6,62 @@ A comprehensive breakdown of implementation steps based on the full Finpilot spe
 
 ## 🔧 Milestone 1: Monorepo & Schema Foundation
 
-- [ ] Initialize NX monorepo
-- [ ] Create `/apps/web` (Next.js + TypeScript)
-- [ ] Create `/apps/api` (Fastify + TypeScript)
-- [ ] Add `/libs/ui`, `/libs/auth`, `/libs/api-clients`
-- [ ] Set up Tailwind CSS in `web`
-- [ ] Install Prisma + create `prisma/schema.prisma`
-- [ ] Configure environment variables for Supabase connection
-- [ ] Run initial Prisma migration
+- [x] Initialize NX monorepo
+- [x] Create `/apps/web` (Next.js + TypeScript)
+- [x] Create `/apps/api` (Fastify + TypeScript)
+- [x] Add `/libs/ui`, `/libs/auth`, `/libs/api-clients`
+- [x] Set up Tailwind CSS in `web`
+- [x] Install Prisma + create `prisma/schema.prisma`
+- [x] Configure environment variables for Supabase connection
+- [x] Run initial Prisma migration
 
 ---
 
 ## 🧱 Milestone 2: Backend API Setup
 
-- [ ] Scaffold Fastify server
-- [ ] Connect Prisma to backend
-- [ ] Create basic routes for:
+- [x] Scaffold Fastify server
+- [x] Connect Prisma to backend
+- [x] Create basic routes for:
 
-  - [ ] `POST /scenario`
-  - [ ] `GET /scenario/:id`
-  - [ ] `PUT /scenario/:id`
-  - [ ] `DELETE /scenario/:id`
-  - [ ] Similar routes for `asset`, `incomeStream`, `milestone`
+  - [x] `POST /scenario`
+  - [x] `GET /scenario/:id`
+  - [x] `PUT /scenario/:id`
+  - [x] `DELETE /scenario/:id`
+  - [x] Similar routes for `asset`, `incomeStream`, `milestone`
 
-- [ ] Create forecast route: `POST /forecast`
-- [ ] Write backend unit tests (Jest/Vitest)
+- [x] Create forecast route: `POST /forecast`
+- [x] Write backend unit tests (Jest/Vitest)
 
 ---
 
 ## 🧑‍💻 Milestone 3: Frontend Setup + Auth
 
-- [ ] Scaffold base Next.js app
-- [ ] Install Supabase JS SDK
-- [ ] Connect Supabase Auth:
+- [x] Scaffold base Next.js app
+- [x] Install Supabase JS SDK
+- [x] Connect Supabase Auth:
 
-  - [ ] Email/password auth
+  - [x] Email/password auth
   - [ ] Google OAuth if easy
 
-- [ ] Build login/signup pages
-- [ ] Create Zustand auth context
-- [ ] Protect authenticated routes
+- [x] Build login/signup pages
+- [x] Create Zustand auth context
+- [x] Protect authenticated routes
+- [x] Write frontend unit tests
 
 ---
 
 ## 🖥 Milestone 4: Scenario Editor UI
 
-- [ ] Create dashboard page
-- [ ] Add personal profile form (age, location, dependents)
-- [ ] Create inputs for:
+- [x] Create dashboard page
+- [x] Add personal profile form (age, location, dependents)
+- [x] Create inputs for:
 
-  - [ ] Assets
-  - [ ] Income streams
-  - [ ] Milestones
+  - [x] Assets
+  - [x] Income streams
+  - [x] Milestones
 
-- [ ] Use Zustand for form state
-- [ ] Form validation and auto-save draft locally
+- [x] Use Zustand for form state
+- [x] Form validation and auto-save draft locally
 
 ---
 
@@ -93,7 +94,7 @@ A comprehensive breakdown of implementation steps based on the full Finpilot spe
 ## 🔒 Milestone 7: Save + Share
 
 - [ ] Implement scenario persistence (Supabase)
-- [ ] Add “Save Scenario” button
+- [ ] Add "Save Scenario" button
 - [ ] Generate read-only share link
 - [ ] Create read-only UI version for public links
 
@@ -119,8 +120,8 @@ A comprehensive breakdown of implementation steps based on the full Finpilot spe
 
 - [ ] Create PDF export (net worth chart + milestone summary)
 - [ ] Use `react-pdf` or backend renderer (if easier)
-- [ ] Add “Export” button to scenario view
-- [ ] Display “Share Scenario” modal with link
+- [ ] Add "Export" button to scenario view
+- [ ] Display "Share Scenario" modal with link
 
 ---
 

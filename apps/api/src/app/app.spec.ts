@@ -1,11 +1,11 @@
-import Fastify, { FastifyInstance } from 'fastify';
+import fastify from 'fastify';
 import { app } from './app';
 
 describe('GET /', () => {
-  let server: FastifyInstance;
+  let server: ReturnType<typeof fastify>;
 
   beforeEach(() => {
-    server = Fastify();
+    server = fastify();
     server.register(app);
   });
 

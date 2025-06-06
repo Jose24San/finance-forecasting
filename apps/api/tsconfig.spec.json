@@ -1,13 +1,17 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/jest",
-    "types": ["jest", "node"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext"
+    "outDir": "./out-tsc/vitest",
+    "types": ["vitest", "node"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": [
-    "jest.config.ts",
+    "vitest.config.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.d.ts"

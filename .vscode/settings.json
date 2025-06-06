@@ -1,0 +1,4 @@
+{
+  "nxConsole.generateAiAgentRules": true,
+  "terminal.integrated.shell.osx": "/bin/zsh"
+}

@@ -39,6 +39,7 @@
 - **Auth**: Supabase Auth (Email + Google/Apple OAuth)
 - **Payments**: Stripe
 - **Hosting**: Vercel (Frontend), Fly.io (Backend)
+- **Testing**: Vitest
 
 ### Folder Structure (NX Monorepo)
 

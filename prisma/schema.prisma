@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String?
+  age           Int?
+  location      String?
+  dependents    Int        @default(0)
+  tier          UserTier   @default(FREE)
+  scenarios     Scenario[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Scenario {
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  assets          Asset[]
+  incomeStreams   IncomeStream[]
+  milestones      Milestone[]
+  settings        Settings?
+  withdrawalOrder WithdrawalOrder?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Asset {
+  id          String      @id @default(cuid())
+  name        String
+  amount      Float
+  category    AssetType
+  growthRate  Float       @default(7.0) // Default 7% for stocks
+  scenarioId  String
+  scenario    Scenario    @relation(fields: [scenarioId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model IncomeStream {
+  id          String    @id @default(cuid())
+  name        String
+  amount      Float
+  frequency   Frequency @default(MONTHLY)
+  startDate   DateTime
+  endDate     DateTime?
+  raiseRate   Float?    // Annual raise percentage
+  scenarioId  String
+  scenario    Scenario  @relation(fields: [scenarioId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Milestone {
+  id          String        @id @default(cuid())
+  name        String
+  type        MilestoneType
+  date        DateTime
+  impact      Float         // Financial impact (positive or negative)
+  scenarioId  String
+  scenario    Scenario      @relation(fields: [scenarioId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Settings {
+  id                String    @id @default(cuid())
+  inflationRate     Float     @default(2.5)
+  stockGrowthRate   Float     @default(7.0)
+  realEstateGrowth  Float     @default(3.0)
+  scenarioId        String    @unique
+  scenario          Scenario  @relation(fields: [scenarioId], references: [id])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model WithdrawalOrder {
+  id          String    @id @default(cuid())
+  order       String[]  // Array of AssetType in withdrawal order
+  scenarioId  String    @unique
+  scenario    Scenario  @relation(fields: [scenarioId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum UserTier {
+  FREE
+  PREMIUM
+}
+
+enum AssetType {
+  TAXABLE
+  TAX_DEFERRED
+  TAX_FREE
+  REAL_ESTATE
+  CRYPTO
+}
+
+enum Frequency {
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+}
+
+enum MilestoneType {
+  RETIREMENT
+  COLLEGE
+  MAJOR_PURCHASE
+  INCOME_CHANGE
+  DEATH_OF_SPOUSE
+  CUSTOM
+}

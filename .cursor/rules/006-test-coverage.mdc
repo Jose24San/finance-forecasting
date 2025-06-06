@@ -1,0 +1,18 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Testing guidelines using Vitest and Playwright/Cypress
+globs:
+  - "**/*.{test,spec}.{ts,tsx}"
+alwaysApply: false
+---
+
+- Use Vitest for unit testing.
+- Use jest and react testing library in ui component testing.
+- Employ Playwright or Cypress for end-to-end testing.
+- Mock Supabase API in tests to isolate functionality.
+- Run API unit tests with nx test @finpilot/api
+- Run Web unit tests with nx test @finpilot/web
